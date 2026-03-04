@@ -21,7 +21,7 @@ let zoff = 0;
 let circles = [];
 
 function setup() {
-    createCanvas(window.screen.width, window.screen.height);
+    createCanvas(windowWidth, windowHeight);
 
     let totalCircles = 10;
 
@@ -72,27 +72,41 @@ recognition.lang = "en-GB" || "en-US";
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-const startBtn = document.querySelector("button")
-const test = document.querySelector("p")
+let inp;
 
-startBtn.onclick = () => {
-    recognition.start();
-    console.log("starting audio input!")
-}
+recognition.start();
 
 recognition.onresult = (event) => {
-    const inp = event.results[0][0].transcript;
-    console.log("Caught input!");
+    inp = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
     console.log(`Result: ${inp}`)
-    console.log(`Confidence: ${event.results[0][0].confidence}`);
 
-    if (inp == "What is the time?") {
+    const recordWord = names.some(name => inp.includes(name));
+    let command = "";
+
+    if (recordWord) {
+        console.log("recording word detected")
+
+
+        names.forEach(name => {
+            // empties all punctionation and the recording word
+            command = inp.replace(name, "").replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()@\+\?><\[\]\+]/g, '').trim();
+        })
+    }
+
+    understandCommand(command);
+}
+
+function understandCommand(command) {
+    console.log("command:", command);
+
+    // EXAMPLE
+    if (inp.includes("What is the time?")) {
         console.log("the time is...");
     }
 }
 
-recognition.onspeechend = () => {
-    recognition.stop();
+recognition.onend = () => {
+    recognition.start();
 }
 
 recognition.onnomatch = (event) => {
